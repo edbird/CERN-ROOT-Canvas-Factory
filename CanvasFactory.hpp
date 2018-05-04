@@ -5,6 +5,7 @@
 #include <TCanvas.h>
 #include <TFile.h>
 #include <TH1.h>
+#include <TLegend.h>
 
 #include <iostream>
 
@@ -77,6 +78,7 @@ class CanvasFactorySettings
     
     // default axis label font can be changed here
     const Int_t _DEFAULT_AXIS_LABEL_FONT_{4};
+    // 4, 5, 42, 43?
     // default axis label font size can be changed here
     const Int_t _DEFAULT_AXIS_LABEL_FONT_SIZE_{16};
     // default axis number font can be changed here
@@ -102,6 +104,12 @@ class CanvasFactorySettings
     Int_t _canvas_height_;
     const Int_t _DEFAULT_CANVAS_WIDTH_{804}; // 800 + (800 - 796)
     const Int_t _DEFAULT_CANVAS_HEIGHT_{628}; // 600 + (600 - 572)
+
+    // legend size and position
+    Double_t _legend_x_{0.7};
+    Double_t _legend_y_{0.7};
+    Double_t _legend_w_{0.9};
+    Double_t _legend_h_{0.9};
     
 
     ////////////////////////////////////////////////////////////////////////////
@@ -241,10 +249,28 @@ class CanvasFactorySettings
         _canvas_height_ = height;
     }
 
+    void SetLegendSize(const Double_t width, const Double_t height)
+    {
+        _legend_w_ = width;
+        _legend_h_ = height;
+    }
+
+    void SetLegendPosition(const Double_t pos_x, const Double_t pos_y)
+    {
+        _legend_x_ = pos_x;
+        _legend_y_ = pos_y;
+    }
+
+    void SetLegend(const Double_t pos_x, const Double_t pos_y, const Double_t width, const Double_t height)
+    {
+        SetLegendPosition(pos_x, pos_y);
+        SetLegendSize(width, height);
+    }
+
 
 };
 
-// TODO: legend
+
 class CanvasFactory
 {
 
@@ -274,30 +300,53 @@ class CanvasFactory
 
     // entry point function, no directory
     template<typename... Targs>
-    void Canvas(const std::string& filename, TH1* histo, Targs... Fargs)
+    void Canvas(const std::string& filename,
+                TH1* histo, const std::string& legend_text,
+                Targs... Fargs)
     {
-        Canvas(filename, "", histo, Fargs...);
+        Canvas(filename, "", histo, legend_text, Fargs...);
     }
 
     // entry point function
     template<typename... Targs>
-    void Canvas(const std::string& filename, const std::string& directory, TH1* histo, Targs... Fargs)
+    void Canvas(const std::string& filename, const std::string& directory,
+                TH1* histo, const std::string& legend_text,
+                Targs... Fargs)
     {
         std::vector<TH1*> histo_ptr;
         histo_ptr.push_back(histo);
+        // TODO
+        //std::vector<std::pair<TH1*, const std::string>> histo_ptr;
+        //histo_ptr.push_back({histo, histo_legend_text});
+
+        std::vector<const std::string> histo_legend_text;
+        histo_legend_text.push_back(legend_text);
 
         // call recursive function
-        Canvas(histo_ptr, Fargs...);
+        Canvas(histo_ptr, histo_legend_text, Fargs...);
+
+        // log mode string (maybe path?)
+        std::string log_mode_string;
+        if(_settings_._log_mode_)
+        {
+            log_mode_string = std::string("_log");
+        }
 
         // output file
-        std::string full_filename{directory + std::string("/") + filename + std::string(".root")};
+        std::string full_filename{directory + std::string("/") + filename + log_mode_string + std::string(".root")};
         TFile *f_local{new TFile(full_filename.c_str(), "recreate")};
 
         // output canvas
-        std::string full_canvasname_noext{directory + std::string("/") + filename};
+        std::string full_canvasname_noext{directory + std::string("/") + filename + log_mode_string};
         std::cout << _settings_._canvas_width_ << " " << _settings_._canvas_height_ << std::endl;
         TCanvas *c_local{new TCanvas(full_canvasname_noext.c_str(), "", _settings_._canvas_width_, _settings_._canvas_height_)};
         c_local->SetLogy(_settings_._log_mode_);
+
+        // legend
+        TLegend *legend = new TLegend(_settings_._legend_x_,
+                                      _settings_._legend_y_,
+                                      _settings_._legend_x_ + _settings_._legend_w_,
+                                      _settings_._legend_y_ + _settings_._legend_h_);
 
         // when recursive functions returns, vector contains all histogram pointers
         typedef std::vector<TH1*>::iterator Iterator_t;
@@ -310,17 +359,33 @@ class CanvasFactory
             std::cout << "index=" << index << std::endl;
             
             // set histogram options
+            
+            // statsbox
             (*it)->SetStats(0);
+
+            // colors
             (*it)->SetLineColor(_settings_.get_histogram_color(index, histo_ptr.size()));
             (*it)->SetMarkerColor(_settings_.get_histogram_color(index, histo_ptr.size()));
+            
+            // min / max
             (*it)->SetMaximum(_settings_._maximum_);
             (*it)->SetMinimum(_settings_._minimum_);
+
+            // axis label font
+            (*it)->GetXaxis()->SetLabelFont(_settings_._axis_number_font_);
+            (*it)->GetXaxis()->SetLabelFont(_settings_._axis_number_font_);
+            // axis label size
             (*it)->GetXaxis()->SetLabelSize(_settings_._axis_number_font_size_); // TODO check these are correct
             (*it)->GetXaxis()->SetLabelSize(_settings_._axis_number_font_size_);
-            (*it)->GetXaxis()->SetLabelFont(_settings_._axis_number_font_);
-            (*it)->GetXaxis()->SetLabelFont(_settings_._axis_number_font_);
+
+            // axis title font
             (*it)->GetXaxis()->SetTitleFont(_settings_._axis_label_font_);
             (*it)->GetXaxis()->SetTitleFont(_settings_._axis_label_font_);
+            // axis title font size
+            (*it)->GetXaxis()->SetTitleSize(_settings_._axis_label_font_size_);
+            (*it)->GetYaxis()->SetTitleSize(_settings_._axis_label_font_size_);
+
+            // axis title text
             (*it)->GetXaxis()->SetTitle(_settings_._x_axis_label_text_.c_str());
             (*it)->GetYaxis()->SetTitle(_settings_._y_axis_label_text_.c_str());
 
@@ -331,39 +396,50 @@ class CanvasFactory
 
             // write histogram to file
             (*it)->Write();
+
+            // legend
+            std::string legend_text{histo_legend_text.at(index)};
+            legend->AddEntry(*it, legend_text.c_str());
+
         }
 
         // save canvas as png, eps, pdf and C output
-        std::string full_canvasname_png{full_canvasname_noext + std::string(".png")};
-        std::string full_canvasname_eps{full_canvasname_noext + std::string(".eps")};
-        std::string full_canvasname_pdf{full_canvasname_noext + std::string(".pdf")};
-        std::string full_canvasname_C{full_canvasname_noext + std::string(".C")};
-        c_local->SaveAs(full_canvasname_png.c_str());
-        c_local->SaveAs(full_canvasname_eps.c_str());
-        c_local->SaveAs(full_canvasname_pdf.c_str());
-        c_local->SaveAs(full_canvasname_C.c_str());
+        std::vector<const std::string> ext{".png", ".eps", ".pdf", ".C"};
+        for(std::vector<const std::string>::const_iterator it{ext.cbegin()}; it != ext.cend(); ++ it)
+        {
+            std::string full_canvasname_ext{full_canvasname_noext + (*it)};
+            c_local->SaveAs(full_canvasname_ext.c_str());
+        }
 
         // write canvas to file
         c_local->Write();
 
+        // close file
         f_local->Close();
     }
 
     // recursive function
     template<typename... Targs>
-    void Canvas(std::vector<TH1*> &histo_ptr, TH1* histo, Targs... Fargs)
+    void Canvas(std::vector<TH1*> &histo_ptr, std::vector<const std::string> &histo_legend_text,
+                TH1* histo, const std::string& legend_text,
+                Targs... Fargs)
     {
+        // add histogram pointer and legend text to storage
         histo_ptr.push_back(histo);
+        histo_legend_text.push_back(legend_text);
 
-        Canvas(histo_ptr, Fargs...);
+        Canvas(histo_ptr, histo_legend_text, Fargs...);
     }
 
     // terminating function
     // TODO: is this needed
     template<typename... Targs>
-    void Canvas(std::vector<TH1*> &histo_ptr, TH1* histo)
+    void Canvas(std::vector<TH1*> &histo_ptr, std::vector<const std::string> &histo_legend_text,
+                TH1* histo, const std::string& legend_text)
     {
+        // add histogram pointer and legend text to storage
         histo_ptr.push_back(histo);
+        histo_legend_text.push_back(legend_text);
     }
 
 
