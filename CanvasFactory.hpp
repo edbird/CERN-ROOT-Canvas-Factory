@@ -301,7 +301,7 @@ class CanvasFactory
     // entry point function, no directory
     template<typename... Targs>
     void Canvas(const std::string& filename,
-                TH1* histo, const std::string& legend_text,
+                TH1* histo, std::string& legend_text,
                 Targs... Fargs)
     {
         Canvas(filename, "", histo, legend_text, Fargs...);
@@ -310,7 +310,7 @@ class CanvasFactory
     // entry point function
     template<typename... Targs>
     void Canvas(const std::string& filename, const std::string& directory,
-                TH1* histo, const std::string& legend_text,
+                TH1* histo, std::string& legend_text,
                 Targs... Fargs)
     {
         std::vector<TH1*> histo_ptr;
@@ -319,7 +319,7 @@ class CanvasFactory
         //std::vector<std::pair<TH1*, const std::string>> histo_ptr;
         //histo_ptr.push_back({histo, histo_legend_text});
 
-        std::vector<const std::string> histo_legend_text;
+        std::vector<std::string> histo_legend_text;
         histo_legend_text.push_back(legend_text);
 
         // call recursive function
@@ -420,8 +420,8 @@ class CanvasFactory
 
     // recursive function
     template<typename... Targs>
-    void Canvas(std::vector<TH1*> &histo_ptr, std::vector<const std::string> &histo_legend_text,
-                TH1* histo, const std::string& legend_text,
+    void Canvas(std::vector<TH1*> &histo_ptr, std::vector<std::string> &histo_legend_text,
+                TH1* histo, std::string& legend_text,
                 Targs... Fargs)
     {
         // add histogram pointer and legend text to storage
@@ -434,8 +434,8 @@ class CanvasFactory
     // terminating function
     // TODO: is this needed
     template<typename... Targs>
-    void Canvas(std::vector<TH1*> &histo_ptr, std::vector<const std::string> &histo_legend_text,
-                TH1* histo, const std::string& legend_text)
+    void Canvas(std::vector<TH1*> &histo_ptr, std::vector<std::string> &histo_legend_text,
+                TH1* histo, std::string& legend_text)
     {
         // add histogram pointer and legend text to storage
         histo_ptr.push_back(histo);
