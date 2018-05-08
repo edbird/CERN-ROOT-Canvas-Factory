@@ -21,9 +21,6 @@ int main()
     h_el_energy_original->Fill(3.0);
     h_el_energy_original->Fill(3.0);
     h_el_energy_reweight->Fill(1.0, 2.0);
-    //std::string str1("Baseline");
-    //std::string str2("Reweighted");
-    //f.Canvas("el_energy", "el_energy_nolog_dir", h_el_energy_original, str1, h_el_energy_reweight, str2);
     f.Canvas("el_energy", "el_energy_nolog_dir", h_el_energy_original, "Baseline", h_el_energy_reweight, "Reweighted");
 
     return 0;
