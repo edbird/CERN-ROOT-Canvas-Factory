@@ -64,27 +64,26 @@ class CanvasFactorySettings
 
     friend class CanvasFactory;
 
-    // axis label text
-    std::string _x_axis_label_text_;
-    std::string _y_axis_label_text_;
+    // axis title text
+    std::string _x_axis_title_text_;
+    std::string _y_axis_title_text_;
 
-    // axis label font and font size
+    // axis title font and font size
+    Int_t _axis_title_font_;
+    Double_t _axis_title_font_size_;
+
+    // axis label font size
     Int_t _axis_label_font_;
-    Int_t _axis_label_font_size_;
-
-    // axis number font size
-    Int_t _axis_number_font_;
-    Int_t _axis_number_font_size_;
+    Double_t _axis_label_font_size_;
     
     // default axis label font can be changed here
-    const Int_t _DEFAULT_AXIS_LABEL_FONT_{4};
-    // 4, 5, 42, 43?
+    const Int_t _DEFAULT_AXIS_TITLE_FONT_;//{42};
     // default axis label font size can be changed here
-    const Int_t _DEFAULT_AXIS_LABEL_FONT_SIZE_{16};
+    const Double_t _DEFAULT_AXIS_TITLE_FONT_SIZE_;//{0.035};
     // default axis number font can be changed here
-    const Int_t _DEFAULT_AXIS_NUMBER_FONT_{4};
+    const Int_t _DEFAULT_AXIS_LABEL_FONT_;//{42};
     // default axis number font size can be changed here
-    const Int_t _DEFAULT_AXIS_NUMBER_FONT_SIZE_{12};
+    const Double_t _DEFAULT_AXIS_LABEL_FONT_SIZE_;//{0.035};
 
     // canvas log mode switch
     bool _log_mode_;
@@ -102,14 +101,28 @@ class CanvasFactorySettings
     // canvas png image width / height
     Int_t _canvas_width_;
     Int_t _canvas_height_;
-    const Int_t _DEFAULT_CANVAS_WIDTH_{804}; // 800 + (800 - 796)
-    const Int_t _DEFAULT_CANVAS_HEIGHT_{628}; // 600 + (600 - 572)
+    const Int_t _DEFAULT_CANVAS_WIDTH_;//{804}; // 800 + (800 - 796)
+    const Int_t _DEFAULT_CANVAS_HEIGHT_;//{628}; // 600 + (600 - 572)
 
     // legend size and position
-    Double_t _legend_x_{0.7};
-    Double_t _legend_y_{0.7};
-    Double_t _legend_w_{0.9};
-    Double_t _legend_h_{0.9};
+    Double_t _legend_x_;//{0.7}; // TODO
+    Double_t _legend_y_;//{0.7};
+    Double_t _legend_w_;//{0.2};
+    Double_t _legend_h_;//{0.2};
+
+    Double_t _DEFAULT_LEGEND_X_;
+    Double_t _DEFAULT_LEGEND_Y_;
+    Double_t _DEFAULT_LEGEND_W_;
+    Double_t _DEFAULT_LEGEND_H_;
+
+    // legend font and font size
+    Int_t _legend_font_;
+    const Int_t _DEFAULT_LEGEND_FONT_;
+    Double_t _legend_font_size_;
+    const Double_t _DEFAULT_LEGEND_FONT_SIZE_;
+
+    // legend enable (force legend when only 1 data drawn)
+    bool _legend_enable_;
     
 
     ////////////////////////////////////////////////////////////////////////////
@@ -183,23 +196,56 @@ class CanvasFactorySettings
 
     public:
 
-    CanvasFactorySettings(const std::string& x_axis_label_text, const std::string& y_axis_label_text,
+    CanvasFactorySettings(const std::string& x_axis_title_text, const std::string& y_axis_title_text,
                           const Double_t maximum = 1.0, const Double_t minimum = 0.0,
                           const bool log_mode = false)
-        : _x_axis_label_text_{x_axis_label_text}
-        , _y_axis_label_text_{y_axis_label_text}
-        , _axis_label_font_{_DEFAULT_AXIS_LABEL_FONT_}
-        , _axis_label_font_size_{_DEFAULT_AXIS_LABEL_FONT_SIZE_}
-        , _axis_number_font_size_{_DEFAULT_AXIS_NUMBER_FONT_SIZE_}
+        : _DEFAULT_AXIS_TITLE_FONT_{42}
+        , _DEFAULT_AXIS_TITLE_FONT_SIZE_{0.035}
+        , _DEFAULT_AXIS_LABEL_FONT_{42}
+        , _DEFAULT_AXIS_LABEL_FONT_SIZE_{0.035}
+        , _DEFAULT_CANVAS_WIDTH_{804}
+        , _DEFAULT_CANVAS_HEIGHT_{628}
+        , _DEFAULT_LEGEND_X_{0.7}
+        , _DEFAULT_LEGEND_Y_{0.7}
+        , _DEFAULT_LEGEND_W_{0.2}
+        , _DEFAULT_LEGEND_H_{0.2}
+        , _DEFAULT_LEGEND_FONT_{42}
+        , _DEFAULT_LEGEND_FONT_SIZE_{0.035}
+        , _x_axis_title_text_{x_axis_title_text}
+        , _y_axis_title_text_{y_axis_title_text}
+        //, _axis_title_font_{_DEFAULT_AXIS_TITLE_FONT_}
+        //, _axis_title_font_size_{_DEFAULT_AXIS_TITLE_FONT_SIZE_}
+        //, _axis_label_font_size_{_DEFAULT_AXIS_LABEL_FONT_SIZE_}
         , _log_mode_{log_mode}
         //, _draw_opt_{""}
         , _maximum_{maximum}
         , _minimum_{minimum}
-        , _canvas_width_{_DEFAULT_CANVAS_WIDTH_}
-        , _canvas_height_{_DEFAULT_CANVAS_HEIGHT_}
+        //, _canvas_width_{_DEFAULT_CANVAS_WIDTH_}
+        //, _canvas_height_{_DEFAULT_CANVAS_HEIGHT_}
+        , _legend_enable_{false}
     {
-        std::cout << "Canvas Width and Height: " << _DEFAULT_CANVAS_WIDTH_ << " " << _DEFAULT_CANVAS_HEIGHT_ << std::endl;
-        std::cout << "Canvas Width and Height: " << _canvas_width_ << " " << _canvas_height_ << std::endl;
+        _axis_title_font_ = _DEFAULT_AXIS_TITLE_FONT_;
+        _axis_title_font_size_ = _DEFAULT_AXIS_TITLE_FONT_SIZE_;
+        _axis_label_font_ = _DEFAULT_AXIS_LABEL_FONT_;
+        _axis_label_font_size_ = _DEFAULT_AXIS_LABEL_FONT_SIZE_;
+        _canvas_width_ = _DEFAULT_CANVAS_WIDTH_;
+        _canvas_height_ = _DEFAULT_CANVAS_HEIGHT_;
+        _legend_x_ = _DEFAULT_LEGEND_X_;
+        _legend_y_ = _DEFAULT_LEGEND_Y_;
+        _legend_w_ = _DEFAULT_LEGEND_W_;
+        _legend_h_ = _DEFAULT_LEGEND_H_;
+        _legend_font_ = _DEFAULT_LEGEND_FONT_;
+        _legend_font_size_ = _DEFAULT_LEGEND_FONT_SIZE_;
+    }
+
+    void SetAxisTitleFont(const Int_t font)
+    {
+        _axis_title_font_ = font;
+    }
+
+    void SetAxisTitleFontSize(const Double_t size)
+    {
+        _axis_title_font_size_ = size;
     }
 
     void SetAxisLabelFont(const Int_t font)
@@ -207,24 +253,19 @@ class CanvasFactorySettings
         _axis_label_font_ = font;
     }
 
-    void SetAxisLabelFontSize(const Int_t size)
+    void SetAxisLabelFontSize(const Double_t size)
     {
         _axis_label_font_size_ = size;
     }
 
-    void SetAxisNumberFontSize(const Int_t size)
+    void SetXaxisTitleText(const std::string& text)
     {
-        _axis_number_font_size_ = size;
+        _x_axis_title_text_ = text;
     }
 
-    void SetXaxisLabelText(const std::string& text)
+    void SetYaxisTitleText(const std::string& text)
     {
-        _x_axis_label_text_ = text;
-    }
-
-    void SetYaxisLabelText(const std::string& text)
-    {
-        _y_axis_label_text_ = text;
+        _y_axis_title_text_ = text;
     }
 
     void SetLogMode(const bool log_mode)
@@ -267,6 +308,11 @@ class CanvasFactorySettings
         SetLegendSize(width, height);
     }
 
+    void SetLegendEnable(const bool enabled = true)
+    {
+        _legend_enable_ = enabled;
+    }
+
 
 };
 
@@ -285,10 +331,10 @@ class CanvasFactory
     }
 
     // used to set settings for each CanvasFactory individually
-    CanvasFactory(const std::string& x_axis_label_text, const std::string& y_axis_label_text,
+    CanvasFactory(const std::string& x_axis_title_text, const std::string& y_axis_title_text,
                   const Double_t maximum = 1.0, const Double_t minimum = 0.0,
                   const bool log_mode = false)
-        : _settings_(x_axis_label_text, y_axis_label_text, maximum, minimum, log_mode)
+        : _settings_(x_axis_title_text, y_axis_title_text, maximum, minimum, log_mode)
     {
     }
 
@@ -338,7 +384,9 @@ class CanvasFactory
 
         // output canvas
         std::string full_canvasname_noext{directory + std::string("/") + filename + log_mode_string};
-        std::cout << _settings_._canvas_width_ << " " << _settings_._canvas_height_ << std::endl;
+        std::cout << "Canvas size: " << _settings_._canvas_width_ << ", " << _settings_._canvas_height_ << std::endl;
+        //std::cout << "Canvas Width and Height: " << _DEFAULT_CANVAS_WIDTH_ << " " << _DEFAULT_CANVAS_HEIGHT_ << std::endl;
+        //std::cout << "Canvas Width and Height: " << _canvas_width_ << " " << _canvas_height_ << std::endl;
         TCanvas *c_local{new TCanvas(full_canvasname_noext.c_str(), "", _settings_._canvas_width_, _settings_._canvas_height_)};
         c_local->SetLogy(_settings_._log_mode_);
 
@@ -347,6 +395,9 @@ class CanvasFactory
                                       _settings_._legend_y_,
                                       _settings_._legend_x_ + _settings_._legend_w_,
                                       _settings_._legend_y_ + _settings_._legend_h_);
+        legend->SetTextFont(_settings_._legend_font_);
+        legend->SetTextSize(_settings_._legend_font_size_);
+        std::string legend_opt("l"); // TODO
 
         // when recursive functions returns, vector contains all histogram pointers
         typedef std::vector<TH1*>::iterator Iterator_t;
@@ -354,40 +405,39 @@ class CanvasFactory
         for(; it != histo_ptr.end(); ++ it)
         {
             // index of current histogram
-            std::size_t index{std::distance(histo_ptr.begin(), it)};
+            long long index{std::distance(histo_ptr.begin(), it)};
 
-            std::cout << "index=" << index << std::endl;
-            
             // set histogram options
             
             // statsbox
             (*it)->SetStats(0);
 
             // colors
-            (*it)->SetLineColor(_settings_.get_histogram_color(index, histo_ptr.size()));
-            (*it)->SetMarkerColor(_settings_.get_histogram_color(index, histo_ptr.size()));
+            Int_t color{_settings_.get_histogram_color(index, histo_ptr.size())};
+            (*it)->SetLineColor(color);
+            (*it)->SetMarkerColor(color);
             
             // min / max
             (*it)->SetMaximum(_settings_._maximum_);
             (*it)->SetMinimum(_settings_._minimum_);
 
             // axis label font
-            (*it)->GetXaxis()->SetLabelFont(_settings_._axis_number_font_);
-            (*it)->GetXaxis()->SetLabelFont(_settings_._axis_number_font_);
+            (*it)->GetXaxis()->SetLabelFont(_settings_._axis_label_font_);
+            (*it)->GetYaxis()->SetLabelFont(_settings_._axis_label_font_);
             // axis label size
-            (*it)->GetXaxis()->SetLabelSize(_settings_._axis_number_font_size_); // TODO check these are correct
-            (*it)->GetXaxis()->SetLabelSize(_settings_._axis_number_font_size_);
+            (*it)->GetXaxis()->SetLabelSize(_settings_._axis_label_font_size_); // TODO check these are correct
+            (*it)->GetYaxis()->SetLabelSize(_settings_._axis_label_font_size_);
 
             // axis title font
-            (*it)->GetXaxis()->SetTitleFont(_settings_._axis_label_font_);
-            (*it)->GetXaxis()->SetTitleFont(_settings_._axis_label_font_);
+            (*it)->GetXaxis()->SetTitleFont(_settings_._axis_title_font_);
+            (*it)->GetYaxis()->SetTitleFont(_settings_._axis_title_font_);
             // axis title font size
-            (*it)->GetXaxis()->SetTitleSize(_settings_._axis_label_font_size_);
-            (*it)->GetYaxis()->SetTitleSize(_settings_._axis_label_font_size_);
+            (*it)->GetXaxis()->SetTitleSize(_settings_._axis_title_font_size_);
+            (*it)->GetYaxis()->SetTitleSize(_settings_._axis_title_font_size_);
 
             // axis title text
-            (*it)->GetXaxis()->SetTitle(_settings_._x_axis_label_text_.c_str());
-            (*it)->GetYaxis()->SetTitle(_settings_._y_axis_label_text_.c_str());
+            (*it)->GetXaxis()->SetTitle(_settings_._x_axis_title_text_.c_str());
+            (*it)->GetYaxis()->SetTitle(_settings_._y_axis_title_text_.c_str());
 
             // draw to canvas
             std::string draw_opt{_settings_._draw_opt_};
@@ -399,15 +449,24 @@ class CanvasFactory
 
             // legend
             std::string legend_text{histo_legend_text.at(index)};
-            legend->AddEntry(*it, legend_text.c_str());
+            legend->AddEntry(*it, legend_text.c_str(), legend_opt.c_str());
 
         }
 
-        // save canvas as png, eps, pdf and C output
-        std::vector<const std::string> ext{".png", ".eps", ".pdf", ".C"};
-        for(std::vector<const std::string>::const_iterator it{ext.cbegin()}; it != ext.cend(); ++ it)
+        // draw legend if more than 2 sets of data
+        if(_settings_._legend_enable_ || std::distance(histo_ptr.begin(), histo_ptr.end()) > 1)
         {
-            std::string full_canvasname_ext{full_canvasname_noext + (*it)};
+            std::cout << "The number of histograms is: " << std::distance(histo_ptr.begin(), histo_ptr.end()) << std::endl;
+            legend->Draw();
+        }
+
+        // save canvas as png, eps, pdf and C output
+        std::vector<std::string> ext{".png", ".eps", ".pdf", ".C"};
+        //for(std::vector<const std::string>::const_iterator ext_it{ext.cbegin()}; ext_it != ext.cend(); ++ ext_it)
+        std::vector<std::string>::const_iterator ext_it{ext.cbegin()};
+        for(; ext_it != ext.cend(); ++ ext_it)
+        {
+            std::string full_canvasname_ext{full_canvasname_noext + (*ext_it)};
             c_local->SaveAs(full_canvasname_ext.c_str());
         }
 
