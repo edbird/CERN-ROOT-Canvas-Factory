@@ -138,7 +138,7 @@ class CanvasFactorySettings
         else if(count == 2)
         {   
             if(index == 0) return 4; // blue
-            else return 1; // black
+            else return 2; // red
         }
         /*
         else if(count == 3)
