@@ -197,7 +197,7 @@ class CanvasFactorySettings
     public:
 
     CanvasFactorySettings(const std::string& x_axis_title_text, const std::string& y_axis_title_text,
-                          const Double_t maximum = 1.0, const Double_t minimum = 0.0,
+                          const Double_t minimum = 1.0, const Double_t maximum = 0.0,
                           const bool log_mode = false)
         : _DEFAULT_AXIS_TITLE_FONT_{42}
         , _DEFAULT_AXIS_TITLE_FONT_SIZE_{0.035}
@@ -347,7 +347,8 @@ class CanvasFactory
     // entry point function, no directory
     template<typename... Targs>
     void Canvas(const std::string& filename,
-                TH1* histo, std::string& legend_text,
+                TH1* histo, const std::string& legend_text,
+                //TH1* histo, const char* legend_text,
                 Targs... Fargs)
     {
         Canvas(filename, "", histo, legend_text, Fargs...);
@@ -356,7 +357,8 @@ class CanvasFactory
     // entry point function
     template<typename... Targs>
     void Canvas(const std::string& filename, const std::string& directory,
-                TH1* histo, std::string& legend_text,
+                TH1* histo, const std::string& legend_text,
+                //TH1* histo, const char* legend_text,
                 Targs... Fargs)
     {
         std::vector<TH1*> histo_ptr;
@@ -367,6 +369,7 @@ class CanvasFactory
 
         std::vector<std::string> histo_legend_text;
         histo_legend_text.push_back(legend_text);
+        //histo_legend_text.push_back(std::string(legend_text));
 
         // call recursive function
         Canvas(histo_ptr, histo_legend_text, Fargs...);
@@ -480,7 +483,8 @@ class CanvasFactory
     // recursive function
     template<typename... Targs>
     void Canvas(std::vector<TH1*> &histo_ptr, std::vector<std::string> &histo_legend_text,
-                TH1* histo, std::string& legend_text,
+                TH1* histo, const std::string& legend_text,
+                //TH1* histo, const char* legend_text,
                 Targs... Fargs)
     {
         // add histogram pointer and legend text to storage
@@ -494,7 +498,8 @@ class CanvasFactory
     // TODO: is this needed
     template<typename... Targs>
     void Canvas(std::vector<TH1*> &histo_ptr, std::vector<std::string> &histo_legend_text,
-                TH1* histo, std::string& legend_text)
+                TH1* histo, const std::string& legend_text)
+                //TH1* histo, const char* legend_text)
     {
         // add histogram pointer and legend text to storage
         histo_ptr.push_back(histo);
