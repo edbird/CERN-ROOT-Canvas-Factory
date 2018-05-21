@@ -344,35 +344,10 @@ class CanvasFactory
         return _settings_;
     }
 
-    // entry point function, no directory
-    template<typename... Targs>
-    void Canvas(const std::string& filename,
-                TH1* histo, const std::string& legend_text,
-                //TH1* histo, const char* legend_text,
-                Targs... Fargs)
+    private:
+    // create the canvas, save it to file and create all other output files
+    void do_canvas(const std::string& filename, const std::string& directory, std::vector<TH1*> &histo_ptr, std::vector<std::string> &histo_legend_text)
     {
-        Canvas(filename, "", histo, legend_text, Fargs...);
-    }
-
-    // entry point function
-    template<typename... Targs>
-    void Canvas(const std::string& filename, const std::string& directory,
-                TH1* histo, const std::string& legend_text,
-                //TH1* histo, const char* legend_text,
-                Targs... Fargs)
-    {
-        std::vector<TH1*> histo_ptr;
-        histo_ptr.push_back(histo);
-        // TODO
-        //std::vector<std::pair<TH1*, const std::string>> histo_ptr;
-        //histo_ptr.push_back({histo, histo_legend_text});
-
-        std::vector<std::string> histo_legend_text;
-        histo_legend_text.push_back(legend_text);
-        //histo_legend_text.push_back(std::string(legend_text));
-
-        // call recursive function
-        Canvas(histo_ptr, histo_legend_text, Fargs...);
 
         // log mode string (maybe path?)
         std::string log_mode_string;
@@ -478,6 +453,179 @@ class CanvasFactory
 
         // close file
         f_local->Close();
+    }
+
+    public:
+    
+    // entry point function, no directory, single histogram only
+    void Canvas(const std::string& filename,
+                TH1* histo, const std::string& legend_text
+                //TH1* histo, const char* legend_text,
+                )
+    {
+        Canvas(filename, "", histo, legend_text);
+    }
+    
+    // entry point function, single histogram only
+    void Canvas(const std::string& filename, const std::string& directory,
+                TH1* histo, const std::string& legend_text
+                //TH1* histo, const char* legend_text,
+                )
+    {
+        std::vector<TH1*> histo_ptr;
+        histo_ptr.push_back(histo);
+        // TODO
+        //std::vector<std::pair<TH1*, const std::string>> histo_ptr;
+        //histo_ptr.push_back({histo, histo_legend_text});
+
+        std::vector<std::string> histo_legend_text;
+        histo_legend_text.push_back(legend_text);
+        //histo_legend_text.push_back(std::string(legend_text));
+
+        // call recursive function
+        //Canvas(histo_ptr, histo_legend_text, Fargs...);
+
+        do_canvas(filename, directory, histo_ptr, histo_legend_text);
+    }
+
+    // entry point function, no directory
+    template<typename... Targs>
+    void Canvas(const std::string& filename,
+                TH1* histo, const std::string& legend_text,
+                //TH1* histo, const char* legend_text,
+                Targs... Fargs)
+    {
+        Canvas(filename, "", histo, legend_text, Fargs...);
+    }
+
+    // entry point function
+    template<typename... Targs>
+    void Canvas(const std::string& filename, const std::string& directory,
+                TH1* histo, const std::string& legend_text,
+                //TH1* histo, const char* legend_text,
+                Targs... Fargs)
+    {
+        std::vector<TH1*> histo_ptr;
+        histo_ptr.push_back(histo);
+        // TODO
+        //std::vector<std::pair<TH1*, const std::string>> histo_ptr;
+        //histo_ptr.push_back({histo, histo_legend_text});
+
+        std::vector<std::string> histo_legend_text;
+        histo_legend_text.push_back(legend_text);
+        //histo_legend_text.push_back(std::string(legend_text));
+
+        // call recursive function
+        Canvas(histo_ptr, histo_legend_text, Fargs...);
+
+        do_canvas(filename, directory, histo_ptr, histo_legend_text);
+
+#if 0
+        // log mode string (maybe path?)
+        std::string log_mode_string;
+        if(_settings_._log_mode_)
+        {
+            log_mode_string = std::string("_log");
+        }
+
+        // output file
+        std::string full_filename{directory + std::string("/") + filename + log_mode_string + std::string(".root")};
+        TFile *f_local{new TFile(full_filename.c_str(), "recreate")};
+
+        // output canvas
+        std::string full_canvasname_noext{directory + std::string("/") + filename + log_mode_string};
+        std::cout << "Canvas size: " << _settings_._canvas_width_ << ", " << _settings_._canvas_height_ << std::endl;
+        //std::cout << "Canvas Width and Height: " << _DEFAULT_CANVAS_WIDTH_ << " " << _DEFAULT_CANVAS_HEIGHT_ << std::endl;
+        //std::cout << "Canvas Width and Height: " << _canvas_width_ << " " << _canvas_height_ << std::endl;
+        TCanvas *c_local{new TCanvas(full_canvasname_noext.c_str(), "", _settings_._canvas_width_, _settings_._canvas_height_)};
+        c_local->SetLogy(_settings_._log_mode_);
+
+        // legend
+        TLegend *legend = new TLegend(_settings_._legend_x_,
+                                      _settings_._legend_y_,
+                                      _settings_._legend_x_ + _settings_._legend_w_,
+                                      _settings_._legend_y_ + _settings_._legend_h_);
+        legend->SetTextFont(_settings_._legend_font_);
+        legend->SetTextSize(_settings_._legend_font_size_);
+        std::string legend_opt("l"); // TODO
+
+        // when recursive functions returns, vector contains all histogram pointers
+        typedef std::vector<TH1*>::iterator Iterator_t;
+        Iterator_t it{histo_ptr.begin()};
+        for(; it != histo_ptr.end(); ++ it)
+        {
+            // index of current histogram
+            long long index{std::distance(histo_ptr.begin(), it)};
+
+            // set histogram options
+            
+            // statsbox
+            (*it)->SetStats(0);
+
+            // colors
+            Int_t color{_settings_.get_histogram_color(index, histo_ptr.size())};
+            (*it)->SetLineColor(color);
+            (*it)->SetMarkerColor(color);
+            
+            // min / max
+            (*it)->SetMaximum(_settings_._maximum_);
+            (*it)->SetMinimum(_settings_._minimum_);
+
+            // axis label font
+            (*it)->GetXaxis()->SetLabelFont(_settings_._axis_label_font_);
+            (*it)->GetYaxis()->SetLabelFont(_settings_._axis_label_font_);
+            // axis label size
+            (*it)->GetXaxis()->SetLabelSize(_settings_._axis_label_font_size_); // TODO check these are correct
+            (*it)->GetYaxis()->SetLabelSize(_settings_._axis_label_font_size_);
+
+            // axis title font
+            (*it)->GetXaxis()->SetTitleFont(_settings_._axis_title_font_);
+            (*it)->GetYaxis()->SetTitleFont(_settings_._axis_title_font_);
+            // axis title font size
+            (*it)->GetXaxis()->SetTitleSize(_settings_._axis_title_font_size_);
+            (*it)->GetYaxis()->SetTitleSize(_settings_._axis_title_font_size_);
+
+            // axis title text
+            (*it)->GetXaxis()->SetTitle(_settings_._x_axis_title_text_.c_str());
+            (*it)->GetYaxis()->SetTitle(_settings_._y_axis_title_text_.c_str());
+
+            // draw to canvas
+            std::string draw_opt{_settings_._draw_opt_};
+            if(index > 0) draw_opt += std::string("same");
+            (*it)->Draw(draw_opt.c_str());
+
+            // write histogram to file
+            (*it)->Write();
+
+            // legend
+            std::string legend_text{histo_legend_text.at(index)};
+            legend->AddEntry(*it, legend_text.c_str(), legend_opt.c_str());
+
+        }
+
+        // draw legend if more than 2 sets of data
+        if(_settings_._legend_enable_ || std::distance(histo_ptr.begin(), histo_ptr.end()) > 1)
+        {
+            std::cout << "The number of histograms is: " << std::distance(histo_ptr.begin(), histo_ptr.end()) << std::endl;
+            legend->Draw();
+        }
+
+        // save canvas as png, eps, pdf and C output
+        std::vector<std::string> ext{".png", ".eps", ".pdf", ".C"};
+        //for(std::vector<const std::string>::const_iterator ext_it{ext.cbegin()}; ext_it != ext.cend(); ++ ext_it)
+        std::vector<std::string>::const_iterator ext_it{ext.cbegin()};
+        for(; ext_it != ext.cend(); ++ ext_it)
+        {
+            std::string full_canvasname_ext{full_canvasname_noext + (*ext_it)};
+            c_local->SaveAs(full_canvasname_ext.c_str());
+        }
+
+        // write canvas to file
+        c_local->Write();
+
+        // close file
+        f_local->Close();
+#endif
     }
 
     // recursive function
