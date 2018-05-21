@@ -357,7 +357,13 @@ class CanvasFactory
         }
 
         // output file
-        std::string full_filename{directory + std::string("/") + filename + log_mode_string + std::string(".root")};
+        std::string full_filename{directory};
+        if(directory.size() > 0)
+        {
+            full_filename += std::string("/");
+        }
+        full_filename += (filename + log_mode_string + std::string(".root"));
+        //std::string full_filename{directory + std::string("/") + filename + log_mode_string + std::string(".root")};
         TFile *f_local{new TFile(full_filename.c_str(), "recreate")};
 
         // output canvas
