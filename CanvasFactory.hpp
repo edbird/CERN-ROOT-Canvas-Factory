@@ -77,13 +77,13 @@ class CanvasFactorySettings
     Double_t _axis_label_font_size_;
     
     // default axis label font can be changed here
-    const Int_t _DEFAULT_AXIS_TITLE_FONT_;//{42};
+    static const Int_t _DEFAULT_AXIS_TITLE_FONT_{42};
     // default axis label font size can be changed here
-    const Double_t _DEFAULT_AXIS_TITLE_FONT_SIZE_;//{0.035};
+    static constexpr const Double_t _DEFAULT_AXIS_TITLE_FONT_SIZE_{0.035};
     // default axis number font can be changed here
-    const Int_t _DEFAULT_AXIS_LABEL_FONT_;//{42};
+    static const Int_t _DEFAULT_AXIS_LABEL_FONT_{42};
     // default axis number font size can be changed here
-    const Double_t _DEFAULT_AXIS_LABEL_FONT_SIZE_;//{0.035};
+    static constexpr const Double_t _DEFAULT_AXIS_LABEL_FONT_SIZE_{0.035};
 
     // canvas log mode switch
     bool _log_mode_;
@@ -101,25 +101,25 @@ class CanvasFactorySettings
     // canvas png image width / height
     Int_t _canvas_width_;
     Int_t _canvas_height_;
-    const Int_t _DEFAULT_CANVAS_WIDTH_;//{804}; // 800 + (800 - 796)
-    const Int_t _DEFAULT_CANVAS_HEIGHT_;//{628}; // 600 + (600 - 572)
+    static const Int_t _DEFAULT_CANVAS_WIDTH_{804}; // 800 + (800 - 796)
+    static const Int_t _DEFAULT_CANVAS_HEIGHT_{628}; // 600 + (600 - 572)
 
     // legend size and position
-    Double_t _legend_x_;//{0.7}; // TODO
-    Double_t _legend_y_;//{0.7};
-    Double_t _legend_w_;//{0.2};
-    Double_t _legend_h_;//{0.2};
+    Double_t _legend_x_;
+    Double_t _legend_y_;
+    Double_t _legend_w_;
+    Double_t _legend_h_;
 
-    Double_t _DEFAULT_LEGEND_X_;
-    Double_t _DEFAULT_LEGEND_Y_;
-    Double_t _DEFAULT_LEGEND_W_;
-    Double_t _DEFAULT_LEGEND_H_;
+    static constexpr const Double_t _DEFAULT_LEGEND_X_{0.7};
+    static constexpr const Double_t _DEFAULT_LEGEND_Y_{0.7};
+    static constexpr const Double_t _DEFAULT_LEGEND_W_{0.2};
+    static constexpr const Double_t _DEFAULT_LEGEND_H_{0.2};
 
     // legend font and font size
     Int_t _legend_font_;
-    const Int_t _DEFAULT_LEGEND_FONT_;
+    static const Int_t _DEFAULT_LEGEND_FONT_{42};
     Double_t _legend_font_size_;
-    const Double_t _DEFAULT_LEGEND_FONT_SIZE_;
+    static constexpr const Double_t _DEFAULT_LEGEND_FONT_SIZE_{0.035};
 
     // legend enable (force legend when only 1 data drawn)
     bool _legend_enable_;
@@ -199,19 +199,20 @@ class CanvasFactorySettings
     CanvasFactorySettings(const std::string& x_axis_title_text, const std::string& y_axis_title_text,
                           const Double_t minimum = 1.0, const Double_t maximum = 0.0,
                           const bool log_mode = false)
-        : _DEFAULT_AXIS_TITLE_FONT_{42}
-        , _DEFAULT_AXIS_TITLE_FONT_SIZE_{0.035}
-        , _DEFAULT_AXIS_LABEL_FONT_{42}
-        , _DEFAULT_AXIS_LABEL_FONT_SIZE_{0.035}
-        , _DEFAULT_CANVAS_WIDTH_{804}
-        , _DEFAULT_CANVAS_HEIGHT_{628}
-        , _DEFAULT_LEGEND_X_{0.7}
-        , _DEFAULT_LEGEND_Y_{0.7}
-        , _DEFAULT_LEGEND_W_{0.2}
-        , _DEFAULT_LEGEND_H_{0.2}
-        , _DEFAULT_LEGEND_FONT_{42}
-        , _DEFAULT_LEGEND_FONT_SIZE_{0.035}
-        , _x_axis_title_text_{x_axis_title_text}
+        //: _DEFAULT_AXIS_TITLE_FONT_{42}
+        //, _DEFAULT_AXIS_TITLE_FONT_SIZE_{0.035}
+        //, _DEFAULT_AXIS_LABEL_FONT_{42}
+        //, _DEFAULT_AXIS_LABEL_FONT_SIZE_{0.035}
+        //, _DEFAULT_CANVAS_WIDTH_{804}
+        //, _DEFAULT_CANVAS_HEIGHT_{628}
+        //, _DEFAULT_LEGEND_X_{0.7}
+        //, _DEFAULT_LEGEND_Y_{0.7}
+        //, _DEFAULT_LEGEND_W_{0.2}
+        //, _DEFAULT_LEGEND_H_{0.2}
+        //, _DEFAULT_LEGEND_FONT_{42}
+        //, _DEFAULT_LEGEND_FONT_SIZE_{0.035}
+        //,
+        : _x_axis_title_text_{x_axis_title_text}
         , _y_axis_title_text_{y_axis_title_text}
         //, _axis_title_font_{_DEFAULT_AXIS_TITLE_FONT_}
         //, _axis_title_font_size_{_DEFAULT_AXIS_TITLE_FONT_SIZE_}
