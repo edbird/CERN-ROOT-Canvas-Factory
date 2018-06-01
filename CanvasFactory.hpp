@@ -279,6 +279,16 @@ class CanvasFactorySettings
         _maximum_ = maximum;
     }
 
+    void SetMin(const Double_t minimum)
+    {
+        _minimum_ = minimum;
+    }
+
+    void SetMax(const Double_t maximum)
+    {
+        _maximum_ = maximum;
+    }
+
     void SetDrawOption(const std::string& draw_opt)
     {
         _draw_opt_ = draw_opt;
@@ -342,6 +352,11 @@ class CanvasFactory
     CanvasFactorySettings& Settings()
     {
         return _settings_;
+    }
+
+    void Settings(const CanvasFactorySettings& settings)
+    {
+        _settings_ = settings;
     }
 
     private:
