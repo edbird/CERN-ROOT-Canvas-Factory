@@ -128,6 +128,7 @@ class CanvasFactorySettings
     bool _output_eps_;
     bool _output_pdf_;
     bool _output_C_;
+    bool _output_ROOT_;
 
     ////////////////////////////////////////////////////////////////////////////
     // PRIVATE FUNCTIONS
@@ -232,6 +233,7 @@ class CanvasFactorySettings
         , _output_eps_{true}
         , _output_pdf_{true}
         , _output_C_{true}
+        , _output_ROOT_{true}
     {
         _axis_title_font_ = _DEFAULT_AXIS_TITLE_FONT_;
         _axis_title_font_size_ = _DEFAULT_AXIS_TITLE_FONT_SIZE_;
@@ -340,6 +342,16 @@ class CanvasFactorySettings
         _output_C_ = false;
     }
 
+    void SetOutputROOT(bool enabled = true)
+    {
+        _output_ROOT_ = enabled;
+    }
+
+    void SetOutputPNG(bool enabled = true)
+    {
+        _output_png_ = enabled;
+    }
+
 };
 
 
@@ -395,7 +407,11 @@ class CanvasFactory
         }
         full_filename += (filename + log_mode_string + std::string(".root"));
         //std::string full_filename{directory + std::string("/") + filename + log_mode_string + std::string(".root")};
-        TFile *f_local{new TFile(full_filename.c_str(), "recreate")};
+        TFile *f_local{nullptr};
+        if(_settings_._output_ROOT_ == true)
+        {
+            f_local = new TFile(full_filename.c_str(), "recreate");
+        }
 
         // output canvas
         std::string full_canvasname_noext{directory + std::string("/") + filename + log_mode_string};
@@ -460,7 +476,8 @@ class CanvasFactory
             (*it)->Draw(draw_opt.c_str());
 
             // write histogram to file
-            (*it)->Write();
+            if(_settings_._output_ROOT_ == true)
+                (*it)->Write();
 
             // legend
             std::string legend_text{histo_legend_text.at(index)};
@@ -490,10 +507,17 @@ class CanvasFactory
         }
 
         // write canvas to file
-        c_local->Write();
+        if(_settings_._output_ROOT_ == true)
+            c_local->Write();
 
         // close file
-        f_local->Close();
+        if(_settings_._output_ROOT_ == true)
+        {
+            f_local->Close();
+        }
+
+        //delete f_local;
+
     }
 
     public:
