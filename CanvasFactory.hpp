@@ -124,6 +124,10 @@ class CanvasFactorySettings
     // legend enable (force legend when only 1 data drawn)
     bool _legend_enable_;
     
+    bool _output_png_;
+    bool _output_eps_;
+    bool _output_pdf_;
+    bool _output_C_;
 
     ////////////////////////////////////////////////////////////////////////////
     // PRIVATE FUNCTIONS
@@ -224,6 +228,10 @@ class CanvasFactorySettings
         //, _canvas_width_{_DEFAULT_CANVAS_WIDTH_}
         //, _canvas_height_{_DEFAULT_CANVAS_HEIGHT_}
         , _legend_enable_{false}
+        , _output_png_{true}
+        , _output_eps_{true}
+        , _output_pdf_{true}
+        , _output_C_{true}
     {
         _axis_title_font_ = _DEFAULT_AXIS_TITLE_FONT_;
         _axis_title_font_size_ = _DEFAULT_AXIS_TITLE_FONT_SIZE_;
@@ -324,6 +332,13 @@ class CanvasFactorySettings
         _legend_enable_ = enabled;
     }
 
+    void SetOutputPNGOnly()
+    {
+        _output_png_ = true;
+        _output_eps_ = false;
+        _output_pdf_ = false;
+        _output_C_ = false;
+    }
 
 };
 
@@ -461,7 +476,11 @@ class CanvasFactory
         }
 
         // save canvas as png, eps, pdf and C output
-        std::vector<std::string> ext{".png", ".eps", ".pdf", ".C"};
+        std::vector<std::string> ext; //{".png", ".eps", ".pdf", ".C"};
+        if(_settings_._output_png_ == true) ext.push_back(".png");
+        if(_settings_._output_eps_ == true) ext.push_back(".eps");
+        if(_settings_._output_pdf_ == true) ext.push_back(".pdf");
+        if(_settings_._output_C_ == true) ext.push_back(".C");
         //for(std::vector<const std::string>::const_iterator ext_it{ext.cbegin()}; ext_it != ext.cend(); ++ ext_it)
         std::vector<std::string>::const_iterator ext_it{ext.cbegin()};
         for(; ext_it != ext.cend(); ++ ext_it)
